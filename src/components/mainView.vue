@@ -299,7 +299,7 @@ export default defineComponent({
 
       // 基于准备好的dom，初始化echarts实例
       let ChartUpStream = echarts.init(document.getElementById('ChartUpStream')!)
-      document.getElementById('ChartCT')!.setAttribute('_echarts_instance_', '')
+      document.getElementById('ChartUpStream')!.setAttribute('_echarts_instance_', '')
       // 绘制图表
       ChartUpStream.setOption({
         zlevel: 1,
@@ -346,7 +346,7 @@ export default defineComponent({
 
       // 基于准备好的dom，初始化echarts实例
       let ChartDownStream = echarts.init(document.getElementById('ChartDownStream')!)
-      document.getElementById('ChartCT')!.setAttribute('_echarts_instance_', '')
+      document.getElementById('ChartDownStream')!.setAttribute('_echarts_instance_', '')
       // 绘制图表
       ChartDownStream.setOption({
         zlevel: 1,
