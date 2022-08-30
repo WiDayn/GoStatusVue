@@ -1,4 +1,35 @@
 <template>
+  <div v-for="(item, index) in tableData" :key="index">
+    <el-row v-if="index % 3 === 0">
+      <el-card class="box-card" style="padding: 14px; width:25%; margin: 2%">
+        <template #header>
+          <div class="card-header">
+            <el-image style="width: 30px" fit="contain" :src="'https://api.widayn.club/countriesFlags/default/' + tableData[index].CountryCode + '.png'"></el-image>
+            {{ tableData[index].DisplayName }}
+          </div>
+        </template>
+      </el-card>
+      <el-card class="box-card" style="padding: 14px; width:25%; margin: 2%" v-if="index <= tableData.length - 2">
+        <template #header>
+          <div class="card-header">
+            <el-image style="width: 30px" fit="contain" :src="'https://api.widayn.club/countriesFlags/default/' + tableData[index + 1].CountryCode + '.png'"></el-image>
+            {{ tableData[index + 1].DisplayName }}
+          </div>
+        </template>
+      </el-card>
+      <el-card class="box-card" style="padding: 14px; width:25%; margin: 2%" v-if="index <= tableData.length - 3">
+        <template #header>
+          <div class="card-header">
+            <el-image style="width: 30px" fit="contain" :src="'https://api.widayn.club/countriesFlags/default/' + tableData[index + 2].CountryCode + '.png'"></el-image>
+            {{ tableData[index + 2].DisplayName }}
+          </div>
+        </template>
+      </el-card>
+    </el-row>
+  </div>
+
+
+  <div class='chart' id='map' style="width: 100%; height: 700px"></div>
   <el-table :data="tableData" style="width: 100%">
     <el-table-column label="在线状态">
       <template #default="scope">
@@ -112,7 +143,9 @@
 import { defineComponent } from 'vue';
 import store from "@/store/store";
 import queryDetail from "@/apis/queryDetail";
-import * as echarts from 'echarts'
+import * as echarts from 'echarts';
+import {WorldJSON} from '@/map/world';
+import getCountryList from "@/apis/getCountryList";
 
 export default defineComponent({
   data(){
@@ -136,7 +169,46 @@ export default defineComponent({
           this.tableData = JSON.parse(store.getTableData())
         }
       }, 1000);
-      return;
+
+      getCountryList.getCountryList().then((res) => {
+        echarts.registerMap('world', WorldJSON);
+        const chart = echarts.init(document.getElementById('map')!);
+        chart.setOption({
+          tooltip: {
+            trigger: 'item',
+            formatter: '{b}<br/>{c} 台'
+          },
+          toolbox: {
+            show: true,
+            orient: 'vertical',
+            left: 'right',
+            top: 'center',
+            feature: {
+              dataView: { readOnly: false },
+              restore: {},
+              saveAsImage: {}
+            }
+          },
+          visualMap: {
+            min: res.Min,
+            max: res.Max,
+            text: ['High', 'Low'],
+            realtime: false,
+            calculable: true,
+            inRange: {
+              color: [
+                '#777788',
+                '#2222DD',
+              ]
+            }
+          },
+          series: [{
+            type: 'map',
+            map: 'world',
+            data: res.Countries
+          }]
+        });
+      })
     },
     getDetail(){
       queryDetail.queryDetail(this.tableData[this.nowSelect]["ClientId"]).then((res) => {
